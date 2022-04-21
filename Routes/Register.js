@@ -5,24 +5,30 @@ const router = express.Router();
 
 router.post("/register", (req, res) => {
   const { username, password } = req.body;
+  const roles = JSOn.stringify(["user"]);
 
   db.getConnection((err, connection) => {
     if (err) throw err;
 
     bcrypt.hash(password, 5).then((hash) => {
       connection.query(
-        "INSERT INTO register(username,password) VALUES (?,?)",
-        [username, hash],
+        "INSERT INTO register(username,password,roles) VALUES (?,?,?)",
+        [username, hash, roles],
         (error, result) => {
           if (error) {
-            res.send("This username is already registred.");
+            res.send({
+              status: "Error",
+              message: "Something went wrong, try again shortly.",
+            });
           } else {
-            res.send("User has been created.");
+            res.send({
+              status: "Success",
+              message: "Account successfully created.",
+            });
           }
         }
       );
     });
-
     connection.release();
   });
 });
