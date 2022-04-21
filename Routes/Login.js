@@ -3,6 +3,8 @@ const db = require("../Config/Database");
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
+const jwt = require("../Middleware/Jwt");
+const { createToken } = require("../Middleware/Jwt");
 
 router.post("/login", (req, res) => {
   const { reqUsername, reqPassword } = req.body;
@@ -12,10 +14,12 @@ router.post("/login", (req, res) => {
     connection.query(
       `SELECT * FROM register WHERE username = "${reqUsername}";`,
       (error, result) => {
+        const user = result[0];
         if (result.length === 0) {
-          res.status(400).json({
+          res.send({
             status: "Error",
             message: "This username does not exist.",
+            authenticated: false,
           });
         }
 
@@ -23,12 +27,22 @@ router.post("/login", (req, res) => {
 
         bcrypt.compare(reqPassword, dbPassword).then((match) => {
           if (!match) {
-            res.status(400).json({
+            res.send({
               status: "Error",
-              message: "Incorrect username &password combination.",
+              message: "Incorrect username & password combination.",
             });
           } else {
-            res.send({ status: "Success", message: "Authenticated." });
+            // res.send(user);
+            const accessToken = createToken(user);
+            res.cookie("accessToken", accessToken, {
+              httpOnly: true,
+              maxAge: 1209600000,
+            });
+            res.send({
+              status: "Success",
+              message: "Successfully logged in.",
+              authenticated: true,
+            });
           }
         });
 

@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/register", (req, res) => {
   const { username, password } = req.body;
-  const roles = JSOn.stringify(["user"]);
+  const roles = JSON.stringify(["user"]);
 
   db.getConnection((err, connection) => {
     if (err) throw err;

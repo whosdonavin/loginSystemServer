@@ -9,9 +9,11 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
+const Dashboard = require("./Routes/Dashboard");
 const Register = require("./Routes/Register");
 const Login = require("./Routes/Login");
 
+app.use("/api", Dashboard);
 app.use("/api", Register);
 app.use("/api", Login);
 
